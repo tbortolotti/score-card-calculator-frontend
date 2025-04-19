@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Score Card Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    label, input, select, button {
+      display: block;
+      margin-top: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+    #result {
+      margin-top: 2rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Calculate your Score Card</h1>
+
+  <form id="scoreForm">
+    <!-- Telomere Length first -->
+    <label>Telomere Length:
+      <select name="telomere_length" id="telomere_length" required>
+        <option value="">Select</option>
+        <option value="Short">Short</option>
+        <option value="Normal">Normal</option>
+        <option value="Not Available">Not Available</option>
+      </select>
+    </label>
+
+    <label>Age at Diagnosis [years]:
+      <input type="number" name="age_at_diagnosis" required>
+    </label>
+
+    <label>Hemoglobin [g/dL]:
+      <input type="number" name="hemoglobin" required>
+    </label>
+
+    <label>PNH Clone:
+      <select name="pnh_clone" required>
+        <option value="">Select</option>
+        <option value="Present">Present</option>
+        <option value="Absent">Absent</option>
+      </select>
+    </label>
+
+    <!-- Conditionally visible fields -->
+    <div id="extraFields">
+      <label>Herythroproietin [U/L]:
+        <input type="number" name="herythroproietin_visible">
+      </label>
+
+      <label>Platelets [x10^9/L]:
+        <input type="number" name="platelets_visible">
+      </label>
+    </div>
+
+    <!-- Hidden fallback values -->
+    <input type="hidden" name="herythroproietin" value="0">
+    <input type="hidden" name="platelets" value="0">
+
+    <button type="submit">Get Score</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const telomereSelect = document.getElementById("telomere_length");
+    const extraFields = document.getElementById("extraFields");
+
+    telomereSelect.addEventListener("change", function () {
+      extraFields.style.display = (this.value === "Not Available") ? "block" : "none";
+    });
+
+    window.onload = function () {
+      extraFields.style.display = "none";
+    };
+
+    document.getElementById("scoreForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
+
+      const telomere_length = form.telomere_length.value;
+      const age_at_diagnosis = form.age_at_diagnosis.value;
+      const hemoglobin = form.hemoglobin.value;
+      const pnh_clone = form.pnh_clone.value;
+
+      const herythroproietin = (form.herythroproietin_visible.offsetParent !== null)
+        ? form.herythroproietin_visible.value
+        : form.herythroproietin.value;
+
+      const platelets = (form.platelets_visible.offsetParent !== null)
+        ? form.platelets_visible.value
+        : form.platelets.value;
+
+      const payload = {
+        telomere_length,
+        age_at_diagnosis,
+        hemoglobin,
+        pnh_clone,
+        herythroproietin,
+        platelets
+      };
+
+      const response = await fetch("https://score-card-calculation.onrender.com/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      const score = Number(data.score);
+
+      let recommendation = "";
+      const threshold = (telomere_length === "Not Available") ? 17 : 13;
+
+      if (score >= threshold) {
+        recommendation = "Genetic test not recommended.";
+      } else {
+        recommendation = "Refer to genetic test.";
+      }
+
+      document.getElementById("result").innerText = `Score Card: ${score}\n${recommendation}`;
+    });
+  </script>
+</body>
+</html>
