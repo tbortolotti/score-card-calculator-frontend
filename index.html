@@ -28,10 +28,10 @@
 
   <form id="scoreForm">
     <!-- Telomere Length first -->
-    <label>Telomere Length:
+    <label>Telomere Length [Short if TL < 10th percentile]:
       <select name="telomere_length" id="telomere_length" required>
         <option value="">Select</option>
-        <option value="Short [< 10th percentile]">Short</option>
+        <option value="Short">Short</option>
         <option value="Normal">Normal</option>
         <option value="Not Available">Not Available</option>
       </select>
@@ -45,10 +45,10 @@
       <input type="number" name="hemoglobin" required>
     </label>
 
-    <label>PNH Clone:
+    <label>PNH Clone  [Present if clone on granulocytes > 0.01 %]:
       <select name="pnh_clone" required>
         <option value="">Select</option>
-        <option value="Present [clone on granulocytes > 0.01 %]">Present</option>
+        <option value="Present">Present</option>
         <option value="Absent">Absent</option>
       </select>
     </label>
